@@ -1,0 +1,147 @@
+<?php
+/*
+ * Act. 3 - Meet With The Cast
+ * THE AWAKENING ✦ 
+ *
+ * From the silence of nothingness, echoes rise from the void.
+ * A journey begins — with runes at your side.
+ * 
+ * Run this script using:
+ *   $ php {file}
+ *   $ php {file} grimoire
+ */
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/redbean-5.7.5/rb.php';
+
+
+/**
+ * I N V O C A T I O N
+ * 
+ * Step 1 — Summon the runes:  
+ * Import each module's manifest.
+ * 
+ * Step 2 — Channel the energy:  
+ * Initialize ether, essence, and entity.
+ * 
+ * Note: Keep #sentinel markers if you're using Sentinel support.
+ */
+use Rune\Aether\Manifest as Aether;
+use Rune\Chanter\Manifest as Chanter;
+use Rune\Weaver\Manifest as Weaver;
+use Rune\Whisper\Manifest as Whisper;
+#sentinel-manifest
+
+Aether::ether()::essence()::entity();
+Chanter::ether()::essence()::entity();
+Weaver::ether()::essence()::entity();
+Whisper::ether()::essence()::entity();
+#sentinel-awaken
+
+
+
+/**
+ * I N C A N T A T I O N
+ * 
+ * This is your working space.  
+ * Use begin() and end() to define the active logic scope.
+ */
+Aether::begin();
+Chanter::begin();
+
+/* 
+ * SETUP DB
+ * [!] extension=pdo_pgsql
+ * [!] extension=pgsql
+ * must installed extension in php.ini */
+function connect() {
+	$NEON_HOST = '';
+	$NEON_DB   = '';
+	$NEON_USER = '';
+	$NEON_PASS = '';
+
+	R::setup(
+			"pgsql:host=$NEON_HOST;dbname=$NEON_DB;sslmode=require",
+			$NEON_USER,
+			$NEON_PASS
+	);
+
+	if (!R::testConnection()) {
+    Whisper::echo("{{text-danger}}Connection failed");
+    Aether::exit();
+	}
+}
+
+Chanter::cast(
+	arg:'script', 
+	echo:'runs a script, e.g., creating database tables.', 
+	execute:function() {
+		connect(); // ensure connection
+		R::exec('CREATE TABLE IF NOT EXISTS "user" (
+    "id" SERIAL PRIMARY KEY,
+    "email" VARCHAR(255)
+		);');
+		Whisper::echo("{{color-success}}Table 'user' created or exists already");
+});
+
+Chanter::cast(
+	arg:'result', 
+	echo:'lists all user emails in the database.', 
+	execute:function() {
+		connect(); // ensure connection
+		
+		$user = R::findAll('user', 'LIMIT 50');
+		Whisper::echo("{{text-secondary}}ID,  Email \n");
+		foreach ($user as $row) {
+    Whisper::echo("$row->id,  $row->email \n");
+		}
+});
+
+Chanter::cast(
+	arg:'create',
+	echo:'create a new user, --email=(string)',  
+	execute:function() {
+		connect(); // ensure connection
+		
+		$user = R::dispense('user');
+		$user->email = Chanter::spell('email');
+		R::store($user);
+		Whisper::echo("{{text-success}}Data successfully added");
+});
+
+Chanter::cast(
+	arg:'update', 
+	echo:'update an existing user, --id=(int) --email=(string)', 
+	execute:function() {
+		connect(); // ensure connection
+		
+		$id = Chanter::spell('id');       // get ID
+		$email = Chanter::spell('email');  // get new data
+		$user = R::load('user', $id);
+		if ($user->id) {
+    $user->email = $email;
+    R::store($user);
+    Whisper::echo("{{text-success}}Data successfully updated");
+		} else {
+    Whisper::echo("{{text-danger}}Data not found");
+		}
+});
+
+Chanter::cast(
+	arg:'delete', 
+	echo:'delete an existing user', 
+	execute:function() {
+		connect(); // ensure connection
+		
+		$id = Chanter::spell('id'); // get ID
+		$user = R::load('user', $id);
+		if ($user->id) {
+    R::trash($user);
+    Whisper::echo("{{text-success}}Data successfully deleted");
+		} else {
+    Whisper::echo("{{text-danger}}Data not found");
+		}
+});
+
+#sentinel-codex
+Chanter::end();
+Aether::end();
