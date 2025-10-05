@@ -60,14 +60,14 @@ function connect() {
 	$NEON_PASS = '';
 
 	R::setup(
-			"pgsql:host=$NEON_HOST;dbname=$NEON_DB;sslmode=require",
-			$NEON_USER,
-			$NEON_PASS
+		"pgsql:host=$NEON_HOST;dbname=$NEON_DB;sslmode=require",
+		$NEON_USER,
+		$NEON_PASS
 	);
 
 	if (!R::testConnection()) {
-    Whisper::echo("{{text-danger}}Connection failed");
-    Aether::exit();
+		Whisper::echo("{{text-danger}}Connection failed");
+		Aether::exit();
 	}
 }
 
@@ -77,8 +77,8 @@ Chanter::cast(
 	execute:function() {
 		connect(); // ensure connection
 		R::exec('CREATE TABLE IF NOT EXISTS "user" (
-    "id" SERIAL PRIMARY KEY,
-    "email" VARCHAR(255)
+			"id" SERIAL PRIMARY KEY,
+			"email" VARCHAR(255)
 		);');
 		Whisper::echo("{{color-success}}Table 'user' created or exists already");
 });
@@ -92,7 +92,7 @@ Chanter::cast(
 		$user = R::findAll('user', 'LIMIT 50');
 		Whisper::echo("{{text-secondary}}ID,  Email \n");
 		foreach ($user as $row) {
-    Whisper::echo("$row->id,  $row->email \n");
+    		Whisper::echo("$row->id,  $row->email \n");
 		}
 });
 
@@ -118,27 +118,27 @@ Chanter::cast(
 		$email = Chanter::spell('email');  // get new data
 		$user = R::load('user', $id);
 		if ($user->id) {
-    $user->email = $email;
-    R::store($user);
-    Whisper::echo("{{text-success}}Data successfully updated");
+			$user->email = $email;
+			R::store($user);
+    		Whisper::echo("{{text-success}}Data successfully updated");
 		} else {
-    Whisper::echo("{{text-danger}}Data not found");
+    		Whisper::echo("{{text-danger}}Data not found");
 		}
 });
 
 Chanter::cast(
 	arg:'delete', 
-	echo:'delete an existing user', 
+	echo:'delete an existing user, --id=(int)', 
 	execute:function() {
 		connect(); // ensure connection
 		
 		$id = Chanter::spell('id'); // get ID
 		$user = R::load('user', $id);
 		if ($user->id) {
-    R::trash($user);
-    Whisper::echo("{{text-success}}Data successfully deleted");
+    		R::trash($user);
+    		Whisper::echo("{{text-success}}Data successfully deleted");
 		} else {
-    Whisper::echo("{{text-danger}}Data not found");
+    		Whisper::echo("{{text-danger}}Data not found");
 		}
 });
 
